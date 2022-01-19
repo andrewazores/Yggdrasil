@@ -54,7 +54,7 @@ public class VelocityController extends AbstractPID<Encoder, Float> implements S
     protected float target = 0;
     protected final float maxIntegralError;
     protected final float deadband;
-    protected boolean inverted = false;
+    protected boolean inverted;
 
     /**
      * Construct a new VelocityController instance.
@@ -185,7 +185,7 @@ public class VelocityController extends AbstractPID<Encoder, Float> implements S
             iOut = 1.0f;
         }
 
-        output = (pOut + iOut + dOut);
+        output = pOut + iOut + dOut;
 
         return normalizePwm(output);
     }

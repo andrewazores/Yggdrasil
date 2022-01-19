@@ -35,7 +35,7 @@ import edu.wpi.first.wpilibj.SpeedController;
  */
 public class TractionController extends VelocityController {
 
-    private boolean tractionEnabled = false;
+    private boolean tractionEnabled;
 
     public TractionController(final SpeedController speedController, final Encoder encoder, final float maxRotationalRate, final float kP, final float kI, final float kD, final float maxIntegralError, final float deadband) {
         super(speedController, encoder, maxRotationalRate, kP, kI, kD, maxIntegralError, deadband);

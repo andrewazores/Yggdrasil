@@ -72,7 +72,7 @@ public class EncoderPIDSrc implements PIDRateValueSrc<Encoder>, PIDRawValueSrc<E
             case kDisplacement:
                 return (float) enc.get();
             default:
-                throw new PIDUtils.InvalidPIDSourceTypeException(sourceType);
+                throw new InvalidPIDSourceTypeException(sourceType);
         }
     }
 

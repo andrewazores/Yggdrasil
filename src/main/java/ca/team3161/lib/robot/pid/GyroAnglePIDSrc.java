@@ -65,7 +65,7 @@ public class GyroAnglePIDSrc implements PIDSrc<GyroBase, Float>, PIDAngleValueSr
             case kRate:
                 return (float) gyro.getRate();
             default:
-                throw new PIDUtils.InvalidPIDSourceTypeException(sourceType);
+                throw new InvalidPIDSourceTypeException(sourceType);
         }
     }
 

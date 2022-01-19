@@ -47,7 +47,7 @@ public class RampingSpeedController implements SpeedController, ComposedComponen
     private final double rampRatio;
     private final double firstFilter;
     private final double secondFilter;
-    private boolean inverted = false;
+    private boolean inverted;
 
     private RampingSpeedController(final Builder builder) {
         this.controller = builder.controller;

@@ -51,7 +51,7 @@ public final class PIDDrivetrain extends AbstractDrivetrainBase implements Compo
     private final PID<? extends Encoder, Integer> leftEncoder, rightEncoder;
     private final PID<? extends Gyro, Float> turningPid, bearingPid;
     private volatile float turningDegreesTarget = 0.0f;
-    private volatile int leftTicksTarget = 0, rightTicksTarget = 0;
+    private volatile int leftTicksTarget, rightTicksTarget;
     private Task t;
     private final Object notifier;
 
