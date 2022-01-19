@@ -65,7 +65,7 @@ proper credit!
 
 === Building
 Yggdrasil can be built by simply running `./gradlew build` in the root of this
-project.
+project. Code auto-formatting can be applied with `./gradlew rewriteRun`.
 
 == Design
 The design intended by these libraries are a main robot class, subclassed
