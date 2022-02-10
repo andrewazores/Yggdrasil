@@ -61,15 +61,6 @@ public class RampingSpeedController implements SpeedController, ComposedComponen
      * {@inheritDoc}
      */
     @Override
-    public void pidWrite(final double output) {
-        final double val = normalizePwm(adjust(normalizePwm(output)));
-        controller.pidWrite(inverted ? -val : val);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public double get() {
         return normalizePwm(controller.get());
     }

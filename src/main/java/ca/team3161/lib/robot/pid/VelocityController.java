@@ -30,14 +30,14 @@ import static ca.team3161.lib.utils.Utils.normalizePwm;
 import static ca.team3161.lib.utils.Utils.requireNonNegative;
 import static java.util.Objects.requireNonNull;
 
-import ca.team3161.lib.utils.ComposedComponent;
-import edu.wpi.first.wpilibj.Encoder;
-import edu.wpi.first.wpilibj.PIDSourceType;
-import edu.wpi.first.wpilibj.SpeedController;
-
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.concurrent.TimeUnit;
+
+import ca.team3161.lib.utils.ComposedComponent;
+import edu.wpi.first.wpilibj.PIDSourceType;
+import edu.wpi.first.wpilibj.SpeedController;
+import edu.wpi.first.wpilibj.pidwrappers.PIDEncoder;
 
 /**
  * A SpeedController implementation which treats its input and output values as proportions of PID velocity targets,
@@ -47,7 +47,7 @@ import java.util.concurrent.TimeUnit;
  * will only return the adjusted value for the next PID iteration; this value represents an actual motor output value,
  * but is not automatically applied to the backing SpeedController instance.
  */
-public class VelocityController extends AbstractPID<Encoder, Float> implements SpeedController, PIDRateValueSrc<Encoder>, ComposedComponent<Object> {
+public class VelocityController extends AbstractPID<PIDEncoder, Float> implements SpeedController, PIDRateValueSrc<PIDEncoder>, ComposedComponent<Object> {
 
     protected final SpeedController speedController;
     protected float maxRotationalRate = 0;
@@ -68,7 +68,7 @@ public class VelocityController extends AbstractPID<Encoder, Float> implements S
      * @param maxIntegralError  limit constant for the integral error.
      * @param deadband          if the absolute value of the deadband falls within this range, output 0.
      */
-    public VelocityController(final SpeedController speedController, final Encoder encoder, final float maxRotationalRate,
+    public VelocityController(final SpeedController speedController, final PIDEncoder encoder, final float maxRotationalRate,
                               final float kP, final float kI, final float kD, final float maxIntegralError, final float deadband) {
         this(speedController, new EncoderPIDSrc(encoder), maxRotationalRate, kP, kI, kD, maxIntegralError, deadband);
     }
@@ -85,7 +85,7 @@ public class VelocityController extends AbstractPID<Encoder, Float> implements S
      * @param maxIntegralError  limit constant for the integral error.
      * @param deadband          if the absolute value of the deadband falls within this range, output 0.
      */
-    public VelocityController(final SpeedController speedController, final PIDRateValueSrc<Encoder> encoderPidSrc, final float maxRotationalRate,
+    public VelocityController(final SpeedController speedController, final PIDRateValueSrc<PIDEncoder> encoderPidSrc, final float maxRotationalRate,
                               final float kP, final float kI, final float kD, final float maxIntegralError, final float deadband) {
         super(encoderPidSrc, -1, -1, TimeUnit.MILLISECONDS, kP, kI, kD);
         this.maxRotationalRate = maxRotationalRate;
@@ -130,16 +130,6 @@ public class VelocityController extends AbstractPID<Encoder, Float> implements S
     public void disable() {
         clear();
         speedController.disable();
-    }
-
-    /**
-     * Used with WPILib PIDControllers.
-     *
-     * @param v pid value.
-     */
-    @Override
-    public void pidWrite(final double v) {
-        speedController.pidWrite(inverted ? -v : v);
     }
 
     /**
@@ -194,7 +184,7 @@ public class VelocityController extends AbstractPID<Encoder, Float> implements S
      * {@inheritDoc}
      */
     @Override
-    public Encoder getSensor() {
+    public PIDEncoder getSensor() {
         return source.getSensor();
     }
 
