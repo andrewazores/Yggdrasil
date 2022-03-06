@@ -28,19 +28,23 @@ package ca.team3161.lib.utils.controls;
 
 import static ca.team3161.lib.utils.Utils.requireNonNegative;
 
+import java.util.BitSet;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
+import java.util.function.Function;
+
 import ca.team3161.lib.robot.LifecycleEvent;
 import ca.team3161.lib.robot.LifecycleListener;
 import ca.team3161.lib.robot.subsystem.RepeatingIndependentSubsystem;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Joystick;
-import java.util.BitSet;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
-import java.util.function.Function;
 
 /**
  * A Gamepad which allows button bindings and control modes.
@@ -53,7 +57,7 @@ public abstract class AbstractController extends RepeatingIndependentSubsystem i
     protected final GenericHID backingHID;
     protected final Map<Mapping, Function<Double, Double>> controlsModeMap = new HashMap<>();
     protected final Map<Mapping, Consumer<Double>> controlsMapping = new HashMap<>();
-    protected final Map<Binding, Runnable> buttonBindings = new ConcurrentHashMap<>();
+    protected final SortedMap<Binding, Runnable> buttonBindings = new TreeMap<>();
     protected final Map<Button, Boolean> buttonStates = new ConcurrentHashMap<>();
     protected final int port;
     protected static final BitSet BOUND_PORTS = new BitSet();
@@ -125,9 +129,19 @@ public abstract class AbstractController extends RepeatingIndependentSubsystem i
             controlsMapping.entrySet().forEach(mapping ->
                 mapping.getValue().accept(getValue(mapping.getKey().getControl(), mapping.getKey().getAxis())));
         }
+        Set<Button> processedButtons = new HashSet<>();
         synchronized (buttonBindings) {
             buttonBindings.entrySet().forEach((Map.Entry<Binding, Runnable> binding) -> {
                 final Set<Button> buttons = binding.getKey().getButtons();
+                boolean alreadySeen = processedButtons.containsAll(buttons);
+                processedButtons.addAll(buttons);
+                if (alreadySeen) {
+                    // we have already processed these buttons. The button binding map is
+                    // sorted by the size of the binding so that button combos are processed
+                    // before single buttons, so that the single button's action can be skipped
+                    // if the single is only pressed incidentally as a partial of a combo
+                    return;
+                }
                 final PressType pressType = binding.getKey().getPressType();
                 final Runnable action = binding.getValue();
 

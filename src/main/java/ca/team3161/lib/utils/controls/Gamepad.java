@@ -28,14 +28,15 @@ package ca.team3161.lib.utils.controls;
 
 import static java.util.Objects.requireNonNull;
 
-import edu.wpi.first.wpilibj.GenericHID;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Stream;
+
+import edu.wpi.first.wpilibj.GenericHID;
 
 /**
  * An interface defining a Gamepad controller. All Gamepads are expected to
@@ -332,7 +333,7 @@ public interface Gamepad {
     /**
      * A (Button, PressType) tuple for identifying button bindings.
      */
-    class Binding {
+    class Binding implements Comparable<Binding> {
         private final Set<Button> buttons;
         private final PressType pressType;
 
@@ -343,7 +344,8 @@ public interface Gamepad {
          * @param pressType the press type
          */
         public Binding(final Collection<Button> buttons, final PressType pressType) {
-            this.buttons = new HashSet<>(requireNonNull(buttons));
+            this.buttons = new TreeSet<>((a, b) -> a.getIdentifier() - b.getIdentifier());
+            this.buttons.addAll(requireNonNull(buttons));
             this.pressType = requireNonNull(pressType);
         }
 
@@ -415,6 +417,31 @@ public interface Gamepad {
                            + "buttons=" + buttons
                            + ", pressType=" + pressType
                            + '}';
+        }
+
+        @Override
+        public int compareTo(Binding other) {
+            return comparatorScore(this) - comparatorScore(other);
+        }
+
+        // TODO is this consistent with equals()?
+        private static int comparatorScore(Binding b) {
+            int idx = 0;
+            int sum = 0;
+            for (Button button : b.buttons) {
+                int scalar = pow10(idx);
+                sum += button.getIdentifier() * scalar;
+                idx++;
+            }
+            return sum;
+        }
+
+        private static int pow10(int e) {
+            int pow = 1;
+            for (int i = 0; i < e; i++) {
+                pow *= 10;
+            }
+            return pow;
         }
     }
 
