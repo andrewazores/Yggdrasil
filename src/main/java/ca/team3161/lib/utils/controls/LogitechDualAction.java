@@ -76,7 +76,8 @@ public class LogitechDualAction extends AbstractController {
         LEFT_TRIGGER(7),
         RIGHT_TRIGGER(8),
         SELECT(9),
-        START(10);
+        START(10),
+        ;
 
         private final int id;
 
@@ -87,6 +88,29 @@ public class LogitechDualAction extends AbstractController {
         @Override
         public int getIdentifier() {
             return this.id;
+        }
+    }
+
+    /**
+     * {@inheritDoc}. Synthetic buttons backed by the gamepad directional pad, which reports as
+     * an HID POV input.
+     */
+    public enum LogitechDpadButton implements Button {
+        UP(DpadDirection.UP.angle),
+        RIGHT(DpadDirection.RIGHT.angle),
+        DOWN(DpadDirection.DOWN.angle),
+        LEFT(DpadDirection.LEFT.angle),
+        ;
+
+        private final int angle;
+
+        LogitechDpadButton(final int angle) {
+            this.angle = angle;
+        }
+
+        @Override
+        public int getIdentifier() {
+            return angle;
         }
     }
 
@@ -166,7 +190,7 @@ public class LogitechDualAction extends AbstractController {
 
     protected static void validate(final Button button, final String message) {
         Objects.requireNonNull(button);
-        if (!(button instanceof LogitechButton)) {
+        if (!(button instanceof LogitechButton || button instanceof LogitechDpadButton)) {
             throw new IllegalArgumentException(message);
         }
     }
@@ -174,7 +198,7 @@ public class LogitechDualAction extends AbstractController {
     protected static void validate(final Binding binding, final String message) {
         Objects.requireNonNull(binding);
         binding.getButtons().stream().forEach((Gamepad.Button button) -> {
-            if (!(button instanceof LogitechButton)) {
+            if (!(button instanceof LogitechButton || button instanceof LogitechDpadButton)) {
                 throw new IllegalArgumentException(message);
             }
         });
@@ -195,7 +219,10 @@ public class LogitechDualAction extends AbstractController {
     @Override
     public boolean getButton(final Button button) {
         validate(button, "Gamepad on port " + getPort() + " getButton() called with invalid button " + button);
-        return backingHID.getRawButton(button.getIdentifier());
+        if (button instanceof LogitechButton) {
+            return backingHID.getRawButton(button.getIdentifier());
+        }
+        return ((LogitechDpadButton) button).angle == getDpad();
     }
 
     public int getDpad() {
